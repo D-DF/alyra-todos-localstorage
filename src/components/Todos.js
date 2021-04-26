@@ -1,4 +1,4 @@
-import { useState } from "react"
+import React, { useState, useEffect } from "react"
 import TodosList from "./TodosList"
 import SelectTodos from "./SelectTodos"
 import AddTodoForm from "./AddTodoForm"
@@ -32,9 +32,18 @@ const initialTodos = [
   }
 ]
 
-const Todos = () => {
-  const [todos, setTodos] = useState(initialTodos)
-  const [filter, setFilter] = useState("all")
+  const Todos = ({darkMode, setDarkMode}) => {
+    const [todos, setTodos] = useState(() => (JSON.parse(localStorage.getItem("todos")) || initialTodos))
+    const [filter, setFilter] = useState("all")
+
+  
+  useEffect(() => {
+     document.title = todos.length > 0 ? `Vous avez ${todos.length} tâches à accomplir !` : "Que devez-vous faire aujourd'hui ?"
+  }, [todos]) 
+
+  useEffect(() => {
+    localStorage.setItem("todos", JSON.stringify(todos))
+  }, [todos])
 
   const addTodo = (text) => {
     const newTodo = {
@@ -46,7 +55,7 @@ const Todos = () => {
   }
 
   const deleteTodo = (task) => {
-    setTodos(todos.filter((el) => el.id !== task.id))
+   setTodos(todos.filter((el) => el.id !== task.id))
   }
 
   const toggleCompleteTodo = (task) => {
@@ -73,9 +82,18 @@ const Todos = () => {
     return true
   })
 
+  const dark = () => {
+    setDarkMode(!darkMode)
+  }
+  
+
   const completedCount = todos.filter((el) => el.isCompleted).length
   return (
     <main>
+      <div className="form-check form-switch">
+      <input className="form-check-input" type="checkbox" id="activate" checked={dark} onChange={dark}/>
+      <label className="form-check-label" for="activate"> Mode Sombre </label>
+    </div>
       <h2 className="text-center">
         Ma liste de tâches ({completedCount} / {todos.length})
       </h2>
@@ -88,6 +106,7 @@ const Todos = () => {
       <AddTodoForm addTodo={addTodo} setFilter={setFilter} />
     </main>
   )
+  
 }
 
 export default Todos
